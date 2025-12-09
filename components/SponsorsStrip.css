@@ -1,0 +1,86 @@
+/* ===== SPONSOR STRIP ===== */
+.sponsors {
+  position: relative;
+  width: 100%;
+  background: #0d0d0d;
+  border-top: 1px solid #ffffff14;
+  border-bottom: 1px solid #ffffff14;
+  overflow: hidden;
+}
+
+.sponsors__inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 22px 10px;
+}
+
+.sponsors__track {
+  display: flex;
+  gap: 18px; /* meno gap per riempire meglio */
+  align-items: center;
+  animation: sponsors-marquee 26s linear infinite;
+  will-change: transform;
+}
+
+.sponsors:hover .sponsors__track {
+  animation-play-state: paused;
+}
+
+@keyframes sponsors-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.sponsor {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  filter: saturate(0.95);
+  transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+}
+
+.sponsor:hover {
+  transform: scale(1.05);
+  filter: saturate(1.1);
+}
+
+/* CARD LOGO */
+.sponsor__imgwrap {
+  position: relative;
+  width: clamp(210px, 20vw, 320px);
+  height: clamp(110px, 9.5vw, 180px);
+  border-radius: 16px;
+  background: #101010;
+  border: 1px solid #ffffff24;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+}
+
+/* IMG */
+.sponsor__img {
+  object-fit: contain;
+  object-position: center;
+  transition: transform 0.2s ease;
+  /* il transform base viene da inline style (scale) */
+}
+
+/* Mobile: un po' più grandi e vicini */
+@media (max-width: 640px) {
+  .sponsors__inner {
+    padding: 18px 8px;
+  }
+
+  .sponsors__track {
+    gap: 14px;
+  }
+
+  .sponsor__imgwrap {
+    width: clamp(200px, 72vw, 260px);
+    height: clamp(105px, 34vw, 150px);
+  }
+}
