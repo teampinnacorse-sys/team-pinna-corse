@@ -1,3 +1,5 @@
+/* Mobile-first layout per Privacy Policy */
+
 .page {
   padding: 1.75rem 1.25rem 3rem;
 }
@@ -65,7 +67,6 @@
   margin-bottom: 0.25rem;
 }
 
-/* classe link locale */
 .link {
   color: #9ae62f;
   text-decoration: underline;

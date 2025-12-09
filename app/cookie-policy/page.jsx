@@ -3,6 +3,9 @@ import styles from "./CookiePolicy.module.css";
 
 export const metadata = {
   title: "Cookie Policy | Team Pinna Corse",
+  description:
+    "Informativa sui cookie utilizzati dal sito ufficiale Team Pinna Corse, nel rispetto del GDPR e della Direttiva ePrivacy.",
+  alternates: { canonical: "/cookie-policy" },
 };
 
 export default function CookiePolicyPage() {

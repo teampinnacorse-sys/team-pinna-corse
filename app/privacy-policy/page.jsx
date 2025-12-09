@@ -3,6 +3,9 @@ import styles from "./PrivacyPolicy.module.css";
 
 export const metadata = {
   title: "Privacy Policy | Team Pinna Corse",
+  description:
+    "Informativa privacy del sito ufficiale Team Pinna Corse, redatta in conformità al GDPR (Regolamento UE 2016/679).",
+  alternates: { canonical: "/privacy-policy" },
 };
 
 export default function PrivacyPolicyPage() {
@@ -26,7 +29,9 @@ export default function PrivacyPolicyPage() {
           <strong>Team Pinna Corse</strong>
           <br />
           Email:{" "}
-          <a href="mailto:teampinnacorse@gmail.com">teampinnacorse@gmail.com</a>
+          <a href="mailto:teampinnacorse@gmail.com" className={styles.link}>
+            teampinnacorse@gmail.com
+          </a>
         </p>
       </section>
 
@@ -48,7 +53,10 @@ export default function PrivacyPolicyPage() {
         <p className={styles.paragraph}>
           Il sito utilizza cookie tecnici e, solo previo consenso, cookie di
           analisi tramite Google Analytics. Per maggiori dettagli consulta la{" "}
-          <a href="/cookie-policy">Cookie Policy</a>.
+          <a href="/cookie-policy" className={styles.link}>
+            Cookie Policy
+          </a>
+          .
         </p>
 
         <h3 className={styles.subTitle}>
@@ -74,7 +82,7 @@ export default function PrivacyPolicyPage() {
         <p className={styles.paragraph}>
           I dati inseriti nel modulo di contatto sono trattati al solo scopo di
           rispondere alle richieste dell&apos;utente (es. informazioni,
-          sponsorizzazioni, collaborazioni).
+          collaborazioni, sponsorizzazioni).
         </p>
         <p className={styles.paragraph}>
           Base giuridica: <strong>art. 6(1)(b) GDPR</strong> – esecuzione di
@@ -129,7 +137,10 @@ export default function PrivacyPolicyPage() {
           </li>
           <li>
             Cookie e dati di Analytics: secondo i tempi indicati nella{" "}
-            <a href="/cookie-policy">Cookie Policy</a>.
+            <a href="/cookie-policy" className={styles.link}>
+              Cookie Policy
+            </a>
+            .
           </li>
         </ul>
       </section>
@@ -139,10 +150,12 @@ export default function PrivacyPolicyPage() {
         <p className={styles.paragraph}>I dati possono essere trattati da:</p>
         <ul className={styles.list}>
           <li>il Titolare e gli eventuali collaboratori autorizzati;</li>
-          <li>fornitori di servizi IT (es. hosting, manutenzione del sito);</li>
           <li>
-            Google Ireland Ltd., in qualità di fornitore di Google Analytics,
-            per i soli dati di navigazione anonimi.
+            fornitori di servizi IT (es. hosting, manutenzione del sito);{" "}
+          </li>
+          <li>
+            fornitori di servizi di analytics (es. Google Ireland Ltd.), per i
+            soli dati di navigazione anonimizzati.
           </li>
         </ul>
       </section>
@@ -153,11 +166,11 @@ export default function PrivacyPolicyPage() {
         </h2>
         <p className={styles.paragraph}>
           Alcuni servizi (es. Google Analytics) possono comportare trasferimenti
-          di dati verso Paesi extra UE, in particolare gli Stati Uniti. Tali
-          trasferimenti avvengono nel rispetto delle disposizioni del GDPR e,
-          ove applicabile, del Data Privacy Framework UE–USA. I dati raccolti
-          sono comunque trattati in forma aggregata e non consentono
-          l&apos;identificazione diretta dell&apos;utente.
+          di dati verso Paesi extra UE. Tali trasferimenti avvengono nel
+          rispetto delle disposizioni del GDPR e, ove applicabile, di adeguate
+          garanzie di protezione dei dati. I dati sono comunque trattati in
+          forma aggregata e non consentono l&apos;identificazione diretta
+          dell&apos;utente.
         </p>
       </section>
 
@@ -183,7 +196,9 @@ export default function PrivacyPolicyPage() {
         </ul>
         <p className={styles.paragraph}>
           Le richieste possono essere inviate a:{" "}
-          <a href="mailto:teampinnacorse@gmail.com">teampinnacorse@gmail.com</a>
+          <a href="mailto:teampinnacorse@gmail.com" className={styles.link}>
+            teampinnacorse@gmail.com
+          </a>
           .
         </p>
       </section>
