@@ -1,6 +1,7 @@
 // app/robots.js
 
-const SITE_URL = "https://team-pinna-corse.vercel.app";
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://team-pinna-corse.vercel.app";
 
 export default function robots() {
   return {

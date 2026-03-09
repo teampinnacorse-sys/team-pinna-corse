@@ -1,8 +1,11 @@
+:root {
+  --nav-h: 88px;
+}
+
 /* ===== TEAM ABOUT (mobile-first, foto alternate + reveal) ===== */
 .t-about {
   position: relative;
-  padding: calc(var(--nav-h) + clamp(14px, 2.5vw, 28px)) 16px
-    clamp(28px, 6vw, 56px);
+  padding: calc(var(--nav-h) + 40px) 16px clamp(28px, 6vw, 56px);
   background: #0a0a0a;
   color: #f2f2f2;
   border-top: 1px solid #ffffff12;
@@ -19,8 +22,9 @@
   margin-bottom: 24px;
   text-align: left;
 }
+
 .t-about__title {
-  margin: 0 0 6px;
+  margin: 0 0 10px;
   font-size: clamp(28px, 8vw, 54px);
   font-weight: 900;
   line-height: 1.05;
@@ -29,11 +33,25 @@
   background: linear-gradient(90deg, #ffe600, #ff8800);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
+
+/* .t-about__title::after {
+  content: "";
+  display: block;
+  width: 120px;
+  height: 3px;
+  margin-top: 10px;
+  background: linear-gradient(90deg, #ffe600, #ff8800);
+  border-radius: 999px;
+} */
+
 .t-about__subtitle {
   margin: 0;
   color: #d6d6d6;
   max-width: 70ch;
+  font-size: clamp(15px, 2.7vw, 18px);
+  line-height: 1.6;
 }
 
 /* ---------- Righe base ---------- */
@@ -55,10 +73,15 @@
   justify-self: center;
 }
 
+.t-text p {
+  margin: 0;
+}
+
 /* ---------- Foto ---------- */
 .t-media {
   margin: 0;
 }
+
 .t-imgwrap {
   position: relative;
   width: 100%;
@@ -68,21 +91,42 @@
   background: #111;
   border: 1px solid #ffffff14;
 }
+
 .t-img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
   transition: transform 0.35s ease;
   will-change: transform;
+  display: block;
 }
+
 .t-imgwrap:hover .t-img {
   transform: scale(1.03);
 }
+
 .t-cap {
   margin-top: 8px;
   font-size: 13px;
   color: #cfcfcf;
   text-align: center;
   opacity: 0.9;
+}
+
+/* ========== Tablet ≥768px ========== */
+@media (min-width: 768px) {
+  .t-about {
+    padding: calc(var(--nav-h) + 48px) 24px clamp(36px, 6vw, 64px);
+  }
+
+  .t-about__head {
+    margin-bottom: 32px;
+  }
+
+  .t-row {
+    gap: 18px 24px;
+  }
 }
 
 /* ========== Desktop ≥900px ========== */
@@ -93,9 +137,15 @@
     gap: clamp(24px, 4vw, 36px);
   }
 
-  /* Riga alternata: inverte le colonne */
   .t-row--alt {
     grid-template-columns: 0.95fr 1.05fr;
+  }
+}
+
+/* ========== Large Desktop ≥1200px ========== */
+@media (min-width: 1200px) {
+  .t-about {
+    padding: calc(var(--nav-h) + 56px) 32px clamp(40px, 6vw, 72px);
   }
 }
 
@@ -111,13 +161,17 @@
   .reveal {
     opacity: 0;
     transform: translateY(14px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
     will-change: opacity, transform;
   }
+
   .reveal.is-visible {
     opacity: 1;
     transform: translateY(0);
   }
+
   .reveal--delay-sm {
     transition-delay: 0.08s;
   }

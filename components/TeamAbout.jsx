@@ -17,7 +17,7 @@ export default function TeamAbout() {
 
     // Evita animazioni se l’utente preferisce ridurre i motion
     const prefersReduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
+      "(prefers-reduced-motion: reduce)",
     ).matches;
     if (prefersReduced) {
       rootRef.current
@@ -35,7 +35,7 @@ export default function TeamAbout() {
           }
         });
       },
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.15 }
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.15 },
     );
 
     rootRef.current.querySelectorAll(".reveal").forEach((el) => io.observe(el));
@@ -49,10 +49,10 @@ export default function TeamAbout() {
           <h1 id="team-title" className="t-about__title">
             La nostra storia
           </h1>
-          <p className="t-about__subtitle">
+          {/* <p className="t-about__subtitle">
             Dalle prime notti in garage alle prove speciali: come è nato e
             cresciuto Team Corse Pinna.
-          </p>
+          </p> */}
         </header>
 
         {/* ===== RIGA 1 ===== */}

@@ -1,63 +1,66 @@
-// app/layout.js
-
-// CSS globali
 import "../styles/globals.css";
 import "@/components/Navbar.css";
 
-// Componenti globali
 import Navbar from "@/components/Navbar";
 import SponsorsStrip from "@/components/SponsorsStrip";
 import Footer from "@/components/Footer";
 
-// Componenti GDPR / Analytics
 import { cookies } from "next/headers";
 import CookieBanner, { COOKIE_NAME } from "@/components/CookieBanner";
 import AnalyticsScripts from "@/components/AnalyticsScripts";
 
-const SITE_URL = "https://team-pinna-corse.vercel.app";
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://team-pinna-corse.vercel.app";
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
+
   title: {
     default: "Team Pinna Corse",
     template: "%s | Team Pinna Corse",
   },
+
   description:
     "Sito ufficiale del Team Pinna Corse: news, eventi rally, foto ufficiali, team e informazioni per sponsor.",
+
   keywords: [
     "Team Pinna Corse",
     "rally",
     "motorsport",
+    "team rally",
     "sponsor rally",
-    "gare",
-    "fotografia rally",
+    "gare rally",
   ],
+
   alternates: {
     canonical: "/",
   },
+
   openGraph: {
     type: "website",
     url: "/",
     title: "Team Pinna Corse",
     description:
-      "Scopri il Team Pinna Corse: news, eventi, foto ufficiali, risultati e spazio dedicato agli sponsor.",
+      "Scopri il Team Pinna Corse: eventi, risultati, foto ufficiali e sponsor.",
     siteName: "Team Pinna Corse",
     images: [
       {
         url: "/foto/TPC-LOGO.png",
         width: 1200,
         height: 630,
-        alt: "Team Pinna Corse – Logo ufficiale",
+        alt: "Team Pinna Corse Logo",
       },
     ],
   },
+
   twitter: {
     card: "summary_large_image",
     title: "Team Pinna Corse",
     description:
-      "Sito ufficiale del Team Pinna Corse. News, eventi rally, foto ufficiali e spazio dedicato agli sponsor.",
+      "Team Pinna Corse - rally team ufficiale. News, eventi e gallery.",
     images: ["/foto/TPC-LOGO.png"],
   },
+
   icons: {
     icon: "/foto/TPC-LOGO.png",
     shortcut: "/foto/TPC-LOGO.png",
@@ -88,34 +91,22 @@ export default async function RootLayout({ children }) {
     logo: `${SITE_URL}/foto/TPC-LOGO.png`,
     sport: "Rally",
     description:
-      "Team Pinna Corse – squadra rally che partecipa a competizioni ufficiali con piloti, navigatori e staff dedicati.",
+      "Team Pinna Corse – squadra rally impegnata in competizioni nazionali.",
   };
 
   return (
     <html lang="it">
-      <body className="rally-theme">
-        {/* Structured Data per SEO */}
+      <body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
         />
 
-        {/* NAVBAR */}
+        <AnalyticsScripts enabled={analyticsAllowed} />
         <Navbar />
-
-        {/* Google Analytics SOLO se accettato */}
-        {analyticsAllowed && <AnalyticsScripts />}
-
-        {/* CONTENUTO PAGINA */}
         <main>{children}</main>
-
-        {/* STRISCIA SPONSOR */}
         <SponsorsStrip />
-
-        {/* FOOTER + link legali + impostazioni cookie */}
         <Footer />
-
-        {/* COOKIE BANNER */}
         <CookieBanner />
       </body>
     </html>
