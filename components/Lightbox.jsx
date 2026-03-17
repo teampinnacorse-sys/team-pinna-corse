@@ -1,45 +1,44 @@
 "use client";
 
 /**
- * Lightbox.jsx
  * Props:
- *  - albums: [{ id, name, photos: [{ id, name, fullSrc, thumbSrc }] }]
- *  - state: { open: bool, albumIdx: number, photoIdx: number }
- *  - onClose: () => void
- *  - onPrev: () => void
- *  - onNext: () => void
+ * - albums: [{ id, name, photos: [{ id, name, fullSrc, thumbSrc }] }]
+ * - state: { albumIdx: number, photoIdx: number }
+ * - onClose: () => void
+ * - onPrev: () => void
+ * - onNext: () => void
  */
-
 export default function Lightbox({ albums, state, onClose, onPrev, onNext }) {
   const album = albums?.[state?.albumIdx];
   const photo = album?.photos?.[state?.photoIdx];
+
   if (!photo) return null;
 
   return (
-    <div className="gd-lightbox" role="dialog" aria-modal="true">
-      <button className="gd-close" onClick={onClose} aria-label="Chiudi">
-        ✕
-      </button>
+    <div
+      className="lb-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="lb-shell" onClick={(e) => e.stopPropagation()}>
+        <button className="lb-close" onClick={onClose} type="button">
+          ✕
+        </button>
 
-      <button className="gd-nav gd-prev" onClick={onPrev} aria-label="Prev">
-        ‹
-      </button>
+        <button className="lb-nav lb-prev" onClick={onPrev} type="button">
+          ‹
+        </button>
 
-      <figure className="gd-figure">
-        <img
-          src={photo.fullSrc}
-          alt={photo.name || "Foto"}
-          className="gd-full"
-          referrerPolicy="no-referrer"
-        />
-        {photo.name ? (
-          <figcaption className="gd-caption">{photo.name}</figcaption>
-        ) : null}
-      </figure>
+        <div className="lb-stage">
+          <img className="lb-image" src={photo.fullSrc} alt={photo.name} />
+          {photo.name ? <div className="lb-caption">{photo.name}</div> : null}
+        </div>
 
-      <button className="gd-nav gd-next" onClick={onNext} aria-label="Next">
-        ›
-      </button>
+        <button className="lb-nav lb-next" onClick={onNext} type="button">
+          ›
+        </button>
+      </div>
     </div>
   );
 }

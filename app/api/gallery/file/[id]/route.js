@@ -21,7 +21,7 @@ function buildMediaUrl(fileId) {
 
 export async function GET(req, { params }) {
   try {
-    const id = params?.id;
+    const { id } = await params;
     const mode = req.nextUrl.searchParams.get("mode") || "full";
 
     if (!API_KEY) {

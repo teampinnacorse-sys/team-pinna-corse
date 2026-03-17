@@ -13,7 +13,7 @@ function buildDriveUrl(params = {}) {
     includeItemsFromAllDrives: "true",
     supportsAllDrives: "true",
     pageSize: "1000",
-    fields: "nextPageToken,files(id,name,mimeType,parents,thumbnailLink)",
+    fields: "nextPageToken,files(id,name,mimeType,parents)",
     ...params,
   };
 
@@ -52,18 +52,11 @@ async function gdriveListAll(params = {}) {
   return allFiles;
 }
 
-function normalizeThumb(thumbnailLink, fileId) {
-  if (thumbnailLink) {
-    return thumbnailLink.replace(/=s\d+(-c)?$/, "=s1200");
-  }
-  return `/api/gallery/file/${encodeURIComponent(fileId)}?mode=thumb`;
-}
-
 function toImage(file) {
   return {
     id: file.id,
     name: file.name,
-    thumbSrc: normalizeThumb(file.thumbnailLink, file.id),
+    thumbSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=thumb`,
     fullSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=full`,
   };
 }
@@ -71,7 +64,7 @@ function toImage(file) {
 function uniqueById(items) {
   const seen = new Set();
   return items.filter((item) => {
-    if (seen.has(item.id)) return false;
+    if (!item?.id || seen.has(item.id)) return false;
     seen.add(item.id);
     return true;
   });
@@ -100,10 +93,12 @@ async function listImagesIn(folderId) {
 
   const files = await gdriveListAll({ q });
 
-  return files
-    .filter((f) => f.mimeType?.startsWith("image/"))
-    .map(toImage)
-    .sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true }));
+  return uniqueById(
+    files
+      .filter((f) => f.mimeType?.startsWith("image/"))
+      .map(toImage)
+      .sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true })),
+  );
 }
 
 export async function GET() {
@@ -139,17 +134,17 @@ export async function GET() {
       onlyAlbumsWithPhotos.flatMap((album) => album.photos),
     );
 
-    const albumList = [
-      {
-        id: "all",
-        name: "Tutte",
-        photos: allPhotos,
-      },
-      ...onlyAlbumsWithPhotos,
-    ];
-
     return NextResponse.json(
-      { albums: albumList },
+      {
+        albums: [
+          {
+            id: "all",
+            name: "Tutte",
+            photos: allPhotos,
+          },
+          ...onlyAlbumsWithPhotos,
+        ],
+      },
       {
         status: 200,
         headers: {

@@ -11,7 +11,6 @@ export default function GalleryDrive() {
   const [activeId, setActiveId] = useState("all");
   const [lightbox, setLightbox] = useState({
     open: false,
-    albumIdx: 0,
     photoIdx: 0,
   });
 
@@ -55,9 +54,10 @@ export default function GalleryDrive() {
     };
   }, []);
 
-  const allAlbum = useMemo(() => {
-    return albums.find((a) => a.id === "all") || null;
-  }, [albums]);
+  const allAlbum = useMemo(
+    () => albums.find((a) => a.id === "all") || null,
+    [albums],
+  );
 
   const photosToShow = useMemo(() => {
     if (!albums.length) return [];
@@ -75,25 +75,23 @@ export default function GalleryDrive() {
     return albums.find((a) => a.id === activeId)?.name || "";
   }, [albums, activeId]);
 
-  const lbAlbums = useMemo(
-    () => [
-      {
-        id: activeId,
-        name: currentAlbumName,
-        photos: photosToShow,
-      },
-    ],
+  const lightboxAlbum = useMemo(
+    () => ({
+      id: activeId,
+      name: currentAlbumName,
+      photos: photosToShow,
+    }),
     [activeId, currentAlbumName, photosToShow],
   );
 
-  const openLightbox = (idx) =>
+  const totalCount = allAlbum?.photos?.length || 0;
+
+  const openLightbox = (idx) => {
     setLightbox({
       open: true,
-      albumIdx: 0,
       photoIdx: idx,
     });
-
-  const totalCount = allAlbum?.photos?.length || 0;
+  };
 
   return (
     <section className="gd-wrap">
@@ -169,22 +167,20 @@ export default function GalleryDrive() {
 
       {lightbox.open && (
         <Lightbox
-          albums={lbAlbums}
-          albumIdx={lightbox.albumIdx}
-          photoIdx={lightbox.photoIdx}
+          albums={[lightboxAlbum]}
+          state={{ albumIdx: 0, photoIdx: lightbox.photoIdx }}
           onClose={() => setLightbox((s) => ({ ...s, open: false }))}
           onPrev={() =>
             setLightbox((s) => {
-              const album = lbAlbums[0];
-              const prev =
-                (s.photoIdx - 1 + album.photos.length) % album.photos.length;
+              const len = lightboxAlbum.photos.length;
+              const prev = (s.photoIdx - 1 + len) % len;
               return { ...s, photoIdx: prev };
             })
           }
           onNext={() =>
             setLightbox((s) => {
-              const album = lbAlbums[0];
-              const next = (s.photoIdx + 1) % album.photos.length;
+              const len = lightboxAlbum.photos.length;
+              const next = (s.photoIdx + 1) % len;
               return { ...s, photoIdx: next };
             })
           }
