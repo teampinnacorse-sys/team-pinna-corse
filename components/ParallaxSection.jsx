@@ -54,9 +54,9 @@ export default function ParallaxSection() {
             </li>
           </ul>
 
-          <a href="#contatti" className="button">
+          {/* <a href="#contatti" className="button">
             Richiedi info
-          </a>
+          </a> */}
         </div>
 
         <div className="card parallax__card">

@@ -1,22 +1,30 @@
 import "./StatsStrip.css";
 
-/* ✅ Singola card statistica */
-const Stat = ({ label, value }) => (
-  <div className="stat">
-    <div className="stat__glow" />
-    <div className="stat__value">{value}</div>
-    <div className="stat__label">{label}</div>
-  </div>
-);
+const stats = [
+  { value: "1600 cc", label: "CILINDRATA" },
+  { value: "500+", label: "ORE DI MESSA A PUNTO" },
+  { value: "400+", label: "PNEUMATICI CONSUMATI" },
+  { value: "20.000+", label: "KM DI SPECIALI PERCORSI" },
+];
+
+function StatCard({ value, label }) {
+  return (
+    <article className="stats-card">
+      <div className="stats-value">{value}</div>
+      <div className="stats-label">{label}</div>
+    </article>
+  );
+}
 
 export default function StatsStrip() {
   return (
-    <section className="section bg-grid rally-lines">
-      <div className="container stats">
-        <Stat label="Cilindrata" value="1600 cc" />
-        <Stat label="Ore di messa a punto" value="500+" />
-        <Stat label="Pneumatici consumati" value="400+" />
-        <Stat label="Km di speciali percorsi" value="20.000+" />
+    <section className="stats-strip section">
+      <div className="container">
+        <div className="stats-grid">
+          {stats.map((item) => (
+            <StatCard key={item.label} value={item.value} label={item.label} />
+          ))}
+        </div>
       </div>
     </section>
   );

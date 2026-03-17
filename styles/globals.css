@@ -33,13 +33,9 @@ select {
   --text-dim: #cfcfcf;
   --brand-1: #ffe600;
   --brand-2: #ff8800;
-
-  /* tipografia fluida */
   --fs-hero: clamp(28px, 6vw, 64px);
   --fs-h2: clamp(20px, 3.5vw, 36px);
   --fs-body: clamp(14px, 2.5vw, 16px);
-
-  /* navbar height (mobile/desk) */
   --nav-h: 56px;
 }
 
@@ -49,17 +45,33 @@ select {
   }
 }
 
-/* Base scura + texture leggera */
 html,
 body {
   height: 100%;
   background: var(--asphalt);
   color: var(--text);
 }
+
+html {
+  scroll-padding-top: var(--nav-h);
+  overflow-y: scroll;
+}
+
 body.rally-theme {
   position: relative;
   min-height: 100%;
+  background: #0a0a0a;
+  color: #f2f2f2;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+  line-height: 1.6;
 }
+
 body.rally-theme::after {
   content: "";
   position: fixed;
@@ -73,6 +85,7 @@ body.rally-theme::after {
   background-size: 18px 18px;
   opacity: 0.28;
 }
+
 body.rally-theme::before {
   content: "";
   position: fixed;
@@ -151,10 +164,12 @@ a {
   }
 }
 
-/* Evita che overlay coprano la navbar */
+/* IMPORTANTE: offset solo sul contenuto, non su tutto il body */
 main {
   position: relative;
   z-index: 1;
+  padding-top: var(--nav-h);
+  min-height: calc(100dvh - var(--nav-h));
 }
 
 /* Pulsanti base */
@@ -171,88 +186,4 @@ main {
 .btn:focus-visible {
   outline: 2px solid var(--brand-1);
   outline-offset: 2px;
-}
-/* ====== GLOBAL RESET MINIMO ====== */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-/* ====== NAVBAR HEIGHT VARS (desktop/mobile) ====== */
-:root {
-  --nav-h: 64px;
-} /* desktop default */
-@media (max-width: 900px) {
-  :root {
-    --nav-h: 56px;
-  } /* mobile/tablet */
-}
-
-/* Quando la navbar è fixed, sposta TUTTO il contenuto sotto */
-html {
-  scroll-padding-top: var(--nav-h);
-} /* per i link con #ancora */
-body.rally-theme {
-  padding-top: var(--nav-h);
-}
-
-/* Evita “saltelli” quando appaiono/dispaiono scrollbar */
-html {
-  overflow-y: scroll;
-}
-
-/* Tema base (tuo stile già esistente) */
-body.rally-theme {
-  background: #0a0a0a;
-  color: #f2f2f2;
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    Arial,
-    sans-serif;
-  line-height: 1.6;
-}
-
-/* opzionale: garantisce che il main non finisca nascosto da footer piccoli */
-main {
-  min-height: calc(100dvh - var(--nav-h));
-}
-main {
-  display: block;
-  min-height: 60vh;
-}
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html,
-body {
-  min-height: 100%;
-}
-
-body {
-  background: #050505;
-  color: #fff;
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-}
-
-main {
-  display: block;
-  min-height: 60vh;
 }

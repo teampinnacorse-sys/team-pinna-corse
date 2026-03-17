@@ -1,26 +1,28 @@
 .gd-wrap {
   width: 100%;
-  padding: calc(var(--nav-h, 92px) + 28px) 18px 60px;
+  padding: calc(var(--nav-h, 92px) + 24px) 18px 60px;
   background: #050505;
   color: #fff;
   min-height: 100vh;
   box-sizing: border-box;
 }
 
+/* ===== HEADER ===== */
 .gd-head {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
 .gd-title {
-  margin: 0;
+  margin: 0 0 12px;
   font-family: "Times New Roman", serif;
-  font-size: clamp(3.4rem, 8vw, 6.5rem);
-  line-height: 0.95;
-  letter-spacing: 0.02em;
+  font-size: clamp(2.4rem, 5vw, 4.4rem);
+  line-height: 0.98;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
-  color: #f5f5f5;
+  color: rgb(251, 251, 249);
 }
 
+/* ===== FILTRI ===== */
 .gd-toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -34,18 +36,14 @@
   background: #0d0d0d;
   color: #f5f5f5;
   border-radius: 999px;
-  padding: 12px 18px;
-  font-size: 1rem;
+  padding: 11px 16px;
+  font-size: 0.95rem;
   line-height: 1;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+  transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .gd-chip span {
@@ -64,6 +62,7 @@
   border-color: #ffe600;
 }
 
+/* ===== GRID ===== */
 .gd-grid {
   column-count: 5;
   column-gap: 14px;
@@ -90,12 +89,10 @@
   border-radius: 18px;
   object-fit: cover;
   background: #141414;
-  opacity: 1;
   transform: scale(1.01);
   transition:
     transform 0.35s ease,
-    filter 0.3s ease,
-    opacity 0.2s ease;
+    filter 0.3s ease;
 }
 
 .gd-card:hover .gd-m-img {
@@ -103,6 +100,7 @@
   filter: brightness(1.03);
 }
 
+/* ===== SKELETON ===== */
 .gd-skeleton {
   width: 100%;
   display: inline-block;
@@ -129,6 +127,7 @@
   }
 }
 
+/* ===== MESSAGGI ===== */
 .gd-error {
   margin-top: 16px;
   padding: 14px 16px;
@@ -145,10 +144,11 @@
   padding: 20px;
   border-radius: 16px;
   background: #111;
-  color: rgba(255, 255, 255, 0.82);
+  color: rgba(255, 255, 255, 0.7);
   text-align: center;
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1200px) {
   .gd-grid {
     column-count: 4;
@@ -157,7 +157,7 @@
 
 @media (max-width: 900px) {
   .gd-wrap {
-    padding: calc(var(--nav-h, 82px) + 22px) 14px 42px;
+    padding: calc(var(--nav-h, 82px) + 20px) 14px 42px;
   }
 
   .gd-grid {
@@ -165,13 +165,8 @@
     column-gap: 12px;
   }
 
-  .gd-card,
-  .gd-skeleton {
-    margin-bottom: 12px;
-  }
-
   .gd-title {
-    font-size: clamp(2.8rem, 10vw, 4.4rem);
+    font-size: clamp(2.1rem, 7vw, 3.2rem);
   }
 }
 
@@ -181,29 +176,23 @@
     column-gap: 10px;
   }
 
+  .gd-title {
+    font-size: clamp(1.9rem, 9vw, 2.6rem);
+  }
+
   .gd-card,
   .gd-skeleton {
     margin-bottom: 10px;
     border-radius: 14px;
   }
 
-  .gd-m-img,
-  .gd-skeleton {
+  .gd-m-img {
     border-radius: 14px;
-  }
-
-  .gd-chip {
-    padding: 11px 14px;
-    font-size: 0.95rem;
   }
 }
 
 @media (max-width: 420px) {
   .gd-grid {
     column-count: 1;
-  }
-
-  .gd-title {
-    font-size: clamp(2.3rem, 12vw, 3.4rem);
   }
 }

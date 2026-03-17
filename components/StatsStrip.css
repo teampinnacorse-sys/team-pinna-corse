@@ -1,82 +1,111 @@
-.sponsors {
+.stats-strip {
   position: relative;
-  width: 100%;
-  overflow: hidden;
-  background: rgba(8, 8, 8, 0.98);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  border-bottom: 2px solid #b7ff00;
-  z-index: 20;
+  z-index: 1;
+  padding: 28px 0 8px;
 }
 
-.sponsors-track {
-  display: flex;
-  align-items: center;
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 18px;
-  width: max-content;
-  padding: 10px 14px;
-  animation: sponsors-marquee 38s linear infinite;
 }
 
-.sponsor-card {
-  flex: 0 0 auto;
-  min-width: 150px;
-  height: 74px;
-  padding: 10px 14px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.stats-card {
+  position: relative;
+  min-height: 190px;
+  border-radius: 22px;
+  padding: 28px 22px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    background 0.25s ease;
+  text-align: center;
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(255, 120, 0, 0.16),
+      transparent 42%
+    ),
+    linear-gradient(180deg, rgba(18, 18, 18, 0.96), rgba(10, 10, 10, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 14px 30px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
 }
 
-.sponsor-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(183, 255, 0, 0.45);
-  background: rgba(255, 255, 255, 0.05);
+.stats-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 120, 0, 0.1),
+    transparent 55%
+  );
+  pointer-events: none;
 }
 
-.sponsor-card img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  display: block;
-  filter: none;
+.stats-value {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1.02;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  color: #ff4d00;
+  text-shadow:
+    0 0 10px rgba(255, 77, 0, 0.28),
+    0 0 24px rgba(255, 140, 0, 0.18);
+  margin-bottom: 18px;
+  white-space: nowrap;
 }
 
-@keyframes sponsors-marquee {
-  0% {
-    transform: translateX(0);
+.stats-label {
+  position: relative;
+  z-index: 1;
+  font-family: "Times New Roman", serif;
+  font-size: clamp(1rem, 2vw, 1.45rem);
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  color: rgba(255, 245, 235, 0.88);
+  max-width: 90%;
+  text-wrap: balance;
+}
+
+@media (min-width: 700px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  100% {
-    transform: translateX(-50%);
-  }
 }
 
-@media (max-width: 900px) {
-  .sponsors-track {
-    gap: 14px;
-    padding: 8px 10px;
+@media (min-width: 1100px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .sponsor-card {
-    min-width: 128px;
-    height: 64px;
-    border-radius: 14px;
-    padding: 8px 10px;
+  .stats-card {
+    min-height: 210px;
+  }
+
+  .stats-value {
+    font-size: clamp(2rem, 3.2vw, 3.6rem);
   }
 }
 
 @media (max-width: 640px) {
-  .sponsor-card {
-    min-width: 110px;
-    height: 58px;
-    border-radius: 12px;
-    padding: 8px;
+  .stats-card {
+    min-height: 170px;
+    padding: 24px 18px;
+  }
+
+  .stats-value {
+    font-size: clamp(2rem, 10vw, 3.2rem);
+  }
+
+  .stats-label {
+    font-size: clamp(0.95rem, 4.2vw, 1.2rem);
   }
 }

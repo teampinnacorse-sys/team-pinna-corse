@@ -30,21 +30,11 @@
   line-height: 1.05;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  background: linear-gradient(90deg, #ffe600, #ff8800);
+  background: linear-gradient(rgb(250, 250, 249));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
-/* .t-about__title::after {
-  content: "";
-  display: block;
-  width: 120px;
-  height: 3px;
-  margin-top: 10px;
-  background: linear-gradient(90deg, #ffe600, #ff8800);
-  border-radius: 999px;
-} */
 
 .t-about__subtitle {
   margin: 0;
