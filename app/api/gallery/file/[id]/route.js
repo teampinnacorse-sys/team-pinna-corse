@@ -1,164 +1,105 @@
 import { NextResponse } from "next/server";
 
 const API_KEY = process.env.GOOGLE_API_KEY;
-const ROOT_ID = process.env.DRIVE_ROOT_FOLDER_ID;
 
-const DRIVE_API = "https://www.googleapis.com/drive/v3/files";
-
-function buildDriveUrl(params = {}) {
-  const url = new URL(DRIVE_API);
-
-  const baseParams = {
-    key: API_KEY,
-    spaces: "drive",
-    includeItemsFromAllDrives: "true",
-    supportsAllDrives: "true",
-    pageSize: "1000",
-    fields: "files(id,name,mimeType,parents,thumbnailLink)",
-    ...params,
-  };
-
-  Object.entries(baseParams).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      url.searchParams.set(key, value);
-    }
-  });
-
+function buildMetadataUrl(id) {
+  const safeId = encodeURIComponent(id);
+  const url = new URL(`https://www.googleapis.com/drive/v3/files/${safeId}`);
+  url.searchParams.set("key", API_KEY);
+  url.searchParams.set("fields", "id,name,mimeType,thumbnailLink");
   return url.toString();
 }
 
-async function gdriveList(params = {}) {
-  const res = await fetch(buildDriveUrl(params), {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Drive API error (${res.status}): ${txt}`);
-  }
-
-  return res.json();
+function buildMediaUrl(id) {
+  const safeId = encodeURIComponent(id);
+  const url = new URL(`https://www.googleapis.com/drive/v3/files/${safeId}`);
+  url.searchParams.set("key", API_KEY);
+  url.searchParams.set("alt", "media");
+  return url.toString();
 }
 
-async function listAlbums(rootId) {
-  const q = [
-    `'${rootId}' in parents`,
-    "mimeType = 'application/vnd.google-apps.folder'",
-    "trashed = false",
-  ].join(" and ");
-
-  const data = await gdriveList({ q });
-
-  return (data.files || []).sort((a, b) =>
-    a.name.localeCompare(b.name, "it", { numeric: true })
-  );
-}
-
-function normalizeThumb(thumbnailLink, fileId) {
-  if (thumbnailLink) {
-    return thumbnailLink.replace(/=s\d+(-c)?$/, "=s1200");
-  }
-
-  return `/api/gallery/file/${encodeURIComponent(fileId)}?mode=thumb`;
-}
-
-function toImage(file) {
-  return {
-    id: file.id,
-    name: file.name,
-    thumbSrc: normalizeThumb(file.thumbnailLink, file.id),
-    fullSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=full`,
-  };
-}
-
-async function listImagesIn(folderId) {
-  const q = [
-    `'${folderId}' in parents`,
-    "mimeType contains 'image/'",
-    "trashed = false",
-  ].join(" and ");
-
-  const data = await gdriveList({ q });
-
-  const files = (data.files || []).map(toImage);
-  files.sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true }));
-  return files;
-}
-
-async function listImagesInRoot(rootId) {
-  const q = [
-    `'${rootId}' in parents`,
-    "mimeType contains 'image/'",
-    "trashed = false",
-  ].join(" and ");
-
-  const data = await gdriveList({ q });
-
-  const files = (data.files || []).map(toImage);
-  files.sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true }));
-  return files;
-}
-
-export async function GET() {
+export async function GET(request, context) {
   try {
-    if (!API_KEY || !ROOT_ID) {
-      return NextResponse.json(
-        {
-          error:
-            "Configura GOOGLE_API_KEY e DRIVE_ROOT_FOLDER_ID nelle variabili ambiente.",
-        },
-        { status: 500 }
-      );
+    if (!API_KEY) {
+      return new NextResponse("GOOGLE_API_KEY mancante.", { status: 500 });
     }
 
-    const [rootImages, folders] = await Promise.all([
-      listImagesInRoot(ROOT_ID),
-      listAlbums(ROOT_ID),
-    ]);
+    const id = context?.params?.id;
 
-    const albumList = [];
+    if (!id) {
+      return new NextResponse("ID file mancante.", { status: 400 });
+    }
 
-    if (rootImages.length) {
-      albumList.push({
-        id: ROOT_ID,
-        name: "Tutte le foto",
-        photos: rootImages,
+    const { searchParams } = new URL(request.url);
+    const mode = searchParams.get("mode") || "full";
+
+    if (mode === "thumb") {
+      const metaRes = await fetch(buildMetadataUrl(id), {
+        cache: "no-store",
+      });
+
+      if (!metaRes.ok) {
+        const txt = await metaRes.text();
+        return new NextResponse(
+          `Drive metadata error (${metaRes.status}): ${txt}`,
+          {
+            status: metaRes.status,
+          },
+        );
+      }
+
+      const meta = await metaRes.json();
+
+      if (meta?.thumbnailLink) {
+        const thumbUrl = meta.thumbnailLink.replace(/=s\d+(-c)?$/, "=s800");
+
+        const thumbRes = await fetch(thumbUrl, {
+          cache: "no-store",
+        });
+
+        if (thumbRes.ok) {
+          const contentType =
+            thumbRes.headers.get("content-type") || "image/jpeg";
+          const arrayBuffer = await thumbRes.arrayBuffer();
+
+          return new NextResponse(arrayBuffer, {
+            status: 200,
+            headers: {
+              "Content-Type": contentType,
+              "Cache-Control": "public, max-age=3600, s-maxage=3600",
+            },
+          });
+        }
+      }
+    }
+
+    const mediaRes = await fetch(buildMediaUrl(id), {
+      cache: "no-store",
+    });
+
+    if (!mediaRes.ok) {
+      const txt = await mediaRes.text();
+      return new NextResponse(`Drive file error (${mediaRes.status}): ${txt}`, {
+        status: mediaRes.status,
       });
     }
 
-    const perFolder = await Promise.all(
-      folders.map(async (folder) => {
-        const photos = await listImagesIn(folder.id);
+    const contentType =
+      mediaRes.headers.get("content-type") || "application/octet-stream";
 
-        return {
-          id: folder.id,
-          name: folder.name,
-          photos,
-        };
-      })
-    );
+    const arrayBuffer = await mediaRes.arrayBuffer();
 
-    albumList.push(...perFolder);
-
-    return NextResponse.json(
-      {
-        albums: albumList,
+    return new NextResponse(arrayBuffer, {
+      status: 200,
+      headers: {
+        "Content-Type": contentType,
+        "Cache-Control": "public, max-age=3600, s-maxage=3600",
       },
-      {
-        status: 200,
-        headers: {
-          "Cache-Control": "no-store, max-age=0",
-        },
-      }
-    );
+    });
   } catch (error) {
-    console.error("GET /api/gallery error:", error);
-
-    return NextResponse.json(
-      {
-        error: error.message || "Errore interno durante il caricamento gallery.",
-      },
-      { status: 500 }
-    );
+    console.error("GET /api/gallery/file/[id] error:", error);
+    return new NextResponse("Errore interno nel proxy immagine.", {
+      status: 500,
+    });
   }
 }

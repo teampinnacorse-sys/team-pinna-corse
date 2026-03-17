@@ -30,7 +30,9 @@ export default function GalleryDrive() {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data?.error || "Errore durante il caricamento gallery.");
+          throw new Error(
+            data?.error || "Errore durante il caricamento gallery.",
+          );
         }
 
         if (!stop) {
@@ -75,7 +77,7 @@ export default function GalleryDrive() {
         photos: photosToShow,
       },
     ],
-    [albums, activeId, photosToShow]
+    [albums, activeId, photosToShow],
   );
 
   const openLightbox = (idx) =>

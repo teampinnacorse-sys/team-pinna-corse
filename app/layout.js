@@ -1,28 +1,23 @@
 import "../styles/globals.css";
 import "@/components/Navbar.css";
-
 import Navbar from "@/components/Navbar";
 import SponsorsStrip from "@/components/SponsorsStrip";
 import Footer from "@/components/Footer";
-
 import { cookies } from "next/headers";
 import CookieBanner, { COOKIE_NAME } from "@/components/CookieBanner";
 import AnalyticsScripts from "@/components/AnalyticsScripts";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://team-pinna-corse.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.teampinnacorse.com";
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
-
   title: {
     default: "Team Pinna Corse",
     template: "%s | Team Pinna Corse",
   },
-
   description:
     "Sito ufficiale del Team Pinna Corse: news, eventi rally, foto ufficiali, team e informazioni per sponsor.",
-
   keywords: [
     "Team Pinna Corse",
     "rally",
@@ -31,11 +26,9 @@ export const metadata = {
     "sponsor rally",
     "gare rally",
   ],
-
   alternates: {
     canonical: "/",
   },
-
   openGraph: {
     type: "website",
     url: "/",
@@ -52,7 +45,6 @@ export const metadata = {
       },
     ],
   },
-
   twitter: {
     card: "summary_large_image",
     title: "Team Pinna Corse",
@@ -60,7 +52,6 @@ export const metadata = {
       "Team Pinna Corse - rally team ufficiale. News, eventi e gallery.",
     images: ["/foto/TPC-LOGO.png"],
   },
-
   icons: {
     icon: "/foto/TPC-LOGO.png",
     shortcut: "/foto/TPC-LOGO.png",
@@ -97,15 +88,14 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="it">
       <body>
+        {analyticsAllowed && <AnalyticsScripts />}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(ldJson) }}
         />
-
-        <AnalyticsScripts enabled={analyticsAllowed} />
         <Navbar />
-        <main>{children}</main>
         <SponsorsStrip />
+        <main>{children}</main>
         <Footer />
         <CookieBanner />
       </body>
