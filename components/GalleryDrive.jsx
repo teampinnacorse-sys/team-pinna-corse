@@ -190,7 +190,6 @@ export default function GalleryDrive() {
                 style={{ opacity: 1 }}
                 onError={(e) => {
                   console.log("IMG FAIL", photo?.id, photo?.thumbSrc);
-                  e.currentTarget.style.opacity = "0.2";
                 }}
               />
             </button>
