@@ -83,11 +83,10 @@ function toImage(file, albumId, albumName) {
     mimeType: file.mimeType,
     albumId,
     albumName,
-    thumbSrc: normalizeThumb(file.thumbnailLink, file.id),
-    fullSrc: buildFullUrl(file),
+    thumbSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=thumb`,
+    fullSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=full`,
   };
 }
-
 async function listAlbums(rootId) {
   const q = [
     `'${rootId}' in parents`,

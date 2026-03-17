@@ -189,12 +189,7 @@ export default function GalleryDrive() {
                 className="gd-m-img"
                 style={{ opacity: 1 }}
                 onError={(e) => {
-                  console.error("Errore caricamento immagine:", {
-                    id: photo?.id,
-                    thumbSrc: photo?.thumbSrc,
-                    fullSrc: photo?.fullSrc,
-                    mimeType: photo?.mimeType,
-                  });
+                  console.log("IMG FAIL", photo?.id, photo?.thumbSrc);
                   e.currentTarget.style.opacity = "0.2";
                 }}
               />
