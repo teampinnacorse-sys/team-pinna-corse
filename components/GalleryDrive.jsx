@@ -15,9 +15,9 @@ export default function GalleryDrive() {
   });
 
   useEffect(() => {
-    let stop = false;
+    let cancelled = false;
 
-    (async () => {
+    async function load() {
       try {
         setLoading(true);
         setErr("");
@@ -34,28 +34,30 @@ export default function GalleryDrive() {
           );
         }
 
-        if (!stop) {
-          setAlbums(Array.isArray(data.albums) ? data.albums : []);
+        if (!cancelled) {
+          setAlbums(Array.isArray(data?.albums) ? data.albums : []);
         }
-      } catch (e) {
-        console.error("Errore fetch gallery:", e);
-        if (!stop) {
-          setErr(e.message || String(e));
+      } catch (error) {
+        console.error("Errore fetch gallery:", error);
+        if (!cancelled) {
+          setErr(error?.message || "Errore sconosciuto.");
         }
       } finally {
-        if (!stop) {
+        if (!cancelled) {
           setLoading(false);
         }
       }
-    })();
+    }
+
+    load();
 
     return () => {
-      stop = true;
+      cancelled = true;
     };
   }, []);
 
   const allAlbum = useMemo(
-    () => albums.find((a) => a.id === "all") || null,
+    () => albums.find((album) => album.id === "all") || null,
     [albums],
   );
 
@@ -63,17 +65,21 @@ export default function GalleryDrive() {
     if (!albums.length) return [];
 
     if (activeId === "all") {
-      return allAlbum?.photos || [];
+      return Array.isArray(allAlbum?.photos) ? allAlbum.photos : [];
     }
 
-    const found = albums.find((a) => a.id === activeId);
-    return found?.photos || [];
+    const selected = albums.find((album) => album.id === activeId);
+    return Array.isArray(selected?.photos) ? selected.photos : [];
   }, [albums, activeId, allAlbum]);
 
   const currentAlbumName = useMemo(() => {
     if (activeId === "all") return "Tutte le foto";
-    return albums.find((a) => a.id === activeId)?.name || "";
+    return albums.find((album) => album.id === activeId)?.name || "";
   }, [albums, activeId]);
+
+  const totalCount = Array.isArray(allAlbum?.photos)
+    ? allAlbum.photos.length
+    : 0;
 
   const lightboxAlbum = useMemo(
     () => ({
@@ -84,14 +90,38 @@ export default function GalleryDrive() {
     [activeId, currentAlbumName, photosToShow],
   );
 
-  const totalCount = allAlbum?.photos?.length || 0;
-
-  const openLightbox = (idx) => {
+  function openLightbox(index) {
     setLightbox({
       open: true,
-      photoIdx: idx,
+      photoIdx: index,
     });
-  };
+  }
+
+  function closeLightbox() {
+    setLightbox((prev) => ({ ...prev, open: false }));
+  }
+
+  function prevLightbox() {
+    setLightbox((prev) => {
+      const total = lightboxAlbum.photos.length;
+      if (!total) return prev;
+      return {
+        ...prev,
+        photoIdx: (prev.photoIdx - 1 + total) % total,
+      };
+    });
+  }
+
+  function nextLightbox() {
+    setLightbox((prev) => {
+      const total = lightboxAlbum.photos.length;
+      if (!total) return prev;
+      return {
+        ...prev,
+        photoIdx: (prev.photoIdx + 1) % total,
+      };
+    });
+  }
 
   return (
     <section className="gd-wrap">
@@ -101,25 +131,28 @@ export default function GalleryDrive() {
 
       <div className="gd-toolbar" role="tablist" aria-label="Filtra album">
         <button
+          type="button"
           className={`gd-chip ${activeId === "all" ? "is-active" : ""}`}
           onClick={() => setActiveId("all")}
           title="Mostra tutte le foto"
-          type="button"
         >
           Tutte <span>{totalCount}</span>
         </button>
 
         {albums
-          .filter((al) => al.id !== "all")
-          .map((al) => (
+          .filter((album) => album.id !== "all")
+          .map((album) => (
             <button
-              key={al.id}
-              className={`gd-chip ${activeId === al.id ? "is-active" : ""}`}
-              onClick={() => setActiveId(al.id)}
-              title={al.name}
+              key={album.id}
               type="button"
+              className={`gd-chip ${activeId === album.id ? "is-active" : ""}`}
+              onClick={() => setActiveId(album.id)}
+              title={album.name}
             >
-              {al.name} <span>{al.photos.length}</span>
+              {album.name}{" "}
+              <span>
+                {Array.isArray(album.photos) ? album.photos.length : 0}
+              </span>
             </button>
           ))}
       </div>
@@ -132,7 +165,7 @@ export default function GalleryDrive() {
         </div>
       )}
 
-      {!!err && (
+      {!loading && !!err && (
         <div className="gd-error">
           <strong>Errore:</strong> {err}
         </div>
@@ -140,21 +173,30 @@ export default function GalleryDrive() {
 
       {!loading && !err && photosToShow.length > 0 && (
         <div className="gd-grid">
-          {photosToShow.map((ph, idx) => (
+          {photosToShow.map((photo, index) => (
             <button
-              key={ph.id}
-              className="gd-card"
-              onClick={() => openLightbox(idx)}
-              aria-label={`Apri ${ph.name}`}
-              title={ph.name}
+              key={photo.id}
               type="button"
+              className="gd-card"
+              onClick={() => openLightbox(index)}
+              aria-label={`Apri ${photo.name}`}
+              title={photo.name}
             >
               <img
-                src={ph.thumbSrc}
-                alt={ph.name}
+                src={photo.thumbSrc}
+                alt={photo.name}
                 loading="lazy"
-                onLoad={(e) => e.currentTarget.classList.add("is-loaded")}
                 className="gd-m-img"
+                style={{ opacity: 1 }}
+                onError={(e) => {
+                  console.error("Errore caricamento immagine:", {
+                    id: photo?.id,
+                    thumbSrc: photo?.thumbSrc,
+                    fullSrc: photo?.fullSrc,
+                    mimeType: photo?.mimeType,
+                  });
+                  e.currentTarget.style.opacity = "0.2";
+                }}
               />
             </button>
           ))}
@@ -169,21 +211,9 @@ export default function GalleryDrive() {
         <Lightbox
           albums={[lightboxAlbum]}
           state={{ albumIdx: 0, photoIdx: lightbox.photoIdx }}
-          onClose={() => setLightbox((s) => ({ ...s, open: false }))}
-          onPrev={() =>
-            setLightbox((s) => {
-              const len = lightboxAlbum.photos.length;
-              const prev = (s.photoIdx - 1 + len) % len;
-              return { ...s, photoIdx: prev };
-            })
-          }
-          onNext={() =>
-            setLightbox((s) => {
-              const len = lightboxAlbum.photos.length;
-              const next = (s.photoIdx + 1) % len;
-              return { ...s, photoIdx: next };
-            })
-          }
+          onClose={closeLightbox}
+          onPrev={prevLightbox}
+          onNext={nextLightbox}
         />
       )}
     </section>

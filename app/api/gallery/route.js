@@ -13,7 +13,8 @@ function buildDriveUrl(params = {}) {
     includeItemsFromAllDrives: "true",
     supportsAllDrives: "true",
     pageSize: "1000",
-    fields: "nextPageToken,files(id,name,mimeType,parents)",
+    fields:
+      "nextPageToken,files(id,name,mimeType,parents,trashed,thumbnailLink,webViewLink,webContentLink)",
     ...params,
   };
 
@@ -61,14 +62,29 @@ function uniqueById(items) {
   });
 }
 
+function normalizeThumb(thumbnailLink, fileId) {
+  if (thumbnailLink) {
+    return thumbnailLink.replace(/=s\d+(-c)?$/, "=s1600");
+  }
+  return `https://lh3.googleusercontent.com/d/${encodeURIComponent(fileId)}=w1600`;
+}
+
+function buildFullUrl(file) {
+  return (
+    file.webContentLink ||
+    `https://drive.google.com/uc?export=view&id=${encodeURIComponent(file.id)}`
+  );
+}
+
 function toImage(file, albumId, albumName) {
   return {
     id: file.id,
     name: file.name,
+    mimeType: file.mimeType,
     albumId,
     albumName,
-    thumbSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=thumb`,
-    fullSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=full`,
+    thumbSrc: normalizeThumb(file.thumbnailLink, file.id),
+    fullSrc: buildFullUrl(file),
   };
 }
 
@@ -97,8 +113,25 @@ async function listImagesIn(folderId, folderName) {
 
   return uniqueById(
     files
-      .filter((f) => f.mimeType?.startsWith("image/"))
-      .map((f) => toImage(f, folderId, folderName))
+      .filter((file) => file.mimeType?.startsWith("image/") && !file.trashed)
+      .map((file) => toImage(file, folderId, folderName))
+      .sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true })),
+  );
+}
+
+async function listRootImages(rootId) {
+  const q = [
+    `'${rootId}' in parents`,
+    "mimeType contains 'image/'",
+    "trashed = false",
+  ].join(" and ");
+
+  const files = await gdriveListAll({ q });
+
+  return uniqueById(
+    files
+      .filter((file) => file.mimeType?.startsWith("image/") && !file.trashed)
+      .map((file) => toImage(file, "root", "Tutte"))
       .sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true })),
   );
 }
@@ -115,7 +148,10 @@ export async function GET() {
       );
     }
 
-    const folders = await listAlbums(ROOT_ID);
+    const [folders, rootImages] = await Promise.all([
+      listAlbums(ROOT_ID),
+      listRootImages(ROOT_ID),
+    ]);
 
     const perFolder = await Promise.all(
       folders.map(async (folder) => {
@@ -132,9 +168,10 @@ export async function GET() {
       (album) => Array.isArray(album.photos) && album.photos.length > 0,
     );
 
-    const allPhotos = uniqueById(
-      onlyAlbumsWithPhotos.flatMap((album) => album.photos),
-    );
+    const allPhotos = uniqueById([
+      ...rootImages,
+      ...onlyAlbumsWithPhotos.flatMap((album) => album.photos),
+    ]);
 
     return NextResponse.json(
       {

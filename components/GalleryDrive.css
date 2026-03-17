@@ -7,8 +7,12 @@
   box-sizing: border-box;
 }
 
+.gd-head {
+  margin-bottom: 22px;
+}
+
 .gd-title {
-  margin: 0 0 22px;
+  margin: 0;
   font-family: "Times New Roman", serif;
   font-size: clamp(3.4rem, 8vw, 6.5rem);
   line-height: 0.95;
@@ -17,14 +21,14 @@
   color: #f5f5f5;
 }
 
-.gd-tabs {
+.gd-toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 18px;
 }
 
-.gd-tab {
+.gd-chip {
   appearance: none;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: #0d0d0d;
@@ -44,17 +48,17 @@
   gap: 10px;
 }
 
-.gd-tab span {
+.gd-chip span {
   opacity: 0.9;
   font-weight: 700;
 }
 
-.gd-tab:hover {
+.gd-chip:hover {
   transform: translateY(-1px);
   border-color: rgba(208, 255, 0, 0.45);
 }
 
-.gd-tab.is-active {
+.gd-chip.is-active {
   background: #ffe600;
   color: #111;
   border-color: #ffe600;
@@ -65,7 +69,7 @@
   column-gap: 14px;
 }
 
-.gd-item {
+.gd-card {
   width: 100%;
   display: inline-block;
   margin: 0 0 14px;
@@ -79,7 +83,6 @@
   border-radius: 18px;
 }
 
-.gd-item img,
 .gd-m-img {
   width: 100%;
   height: auto;
@@ -87,21 +90,15 @@
   border-radius: 18px;
   object-fit: cover;
   background: #141414;
-  opacity: 0;
+  opacity: 1;
   transform: scale(1.01);
   transition:
-    opacity 0.35s ease,
     transform 0.35s ease,
-    filter 0.3s ease;
+    filter 0.3s ease,
+    opacity 0.2s ease;
 }
 
-.gd-item img.is-loaded,
-.gd-m-img.is-loaded {
-  opacity: 1;
-}
-
-.gd-item:hover img,
-.gd-item:hover .gd-m-img {
+.gd-card:hover .gd-m-img {
   transform: scale(1.025);
   filter: brightness(1.03);
 }
@@ -152,14 +149,12 @@
   text-align: center;
 }
 
-/* Tablet */
 @media (max-width: 1200px) {
   .gd-grid {
     column-count: 4;
   }
 }
 
-/* Tablet piccolo */
 @media (max-width: 900px) {
   .gd-wrap {
     padding: calc(var(--nav-h, 82px) + 22px) 14px 42px;
@@ -170,7 +165,7 @@
     column-gap: 12px;
   }
 
-  .gd-item,
+  .gd-card,
   .gd-skeleton {
     margin-bottom: 12px;
   }
@@ -180,32 +175,29 @@
   }
 }
 
-/* Mobile */
 @media (max-width: 640px) {
   .gd-grid {
     column-count: 2;
     column-gap: 10px;
   }
 
-  .gd-item,
+  .gd-card,
   .gd-skeleton {
     margin-bottom: 10px;
     border-radius: 14px;
   }
 
-  .gd-item img,
   .gd-m-img,
   .gd-skeleton {
     border-radius: 14px;
   }
 
-  .gd-tab {
+  .gd-chip {
     padding: 11px 14px;
     font-size: 0.95rem;
   }
 }
 
-/* Mobile stretto */
 @media (max-width: 420px) {
   .gd-grid {
     column-count: 1;
