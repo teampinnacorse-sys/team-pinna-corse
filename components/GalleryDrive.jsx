@@ -184,7 +184,7 @@ export default function GalleryDrive() {
             >
               <img
                 src={photo.thumbSrc}
-                alt={photo.name}
+                alt={`Team Pinna Corse - ${photo.name}`}
                 loading="lazy"
                 className="gd-m-img"
                 style={{ opacity: 1 }}

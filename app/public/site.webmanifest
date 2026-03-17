@@ -1,0 +1,20 @@
+{
+  "name": "Team Pinna Corse",
+  "short_name": "TPC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "icons": [
+    {
+      "src": "/foto/TPC-LOGO.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/foto/TPC-LOGO.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

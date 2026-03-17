@@ -1,21 +1,56 @@
-// app/sitemap.js
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://team-pinna-corse.vercel.app";
+const SITE_URL = "https://www.teampinnacorse.com";
 
 export default function sitemap() {
-  const lastModified = new Date();
+  const now = new Date();
 
   return [
-    { url: `${SITE_URL}/`, lastModified },
-    { url: `${SITE_URL}/team`, lastModified },
-    { url: `${SITE_URL}/gallery`, lastModified },
-    { url: `${SITE_URL}/news`, lastModified },
-    { url: `${SITE_URL}/partners`, lastModified },
-    { url: `${SITE_URL}/contatti`, lastModified },
-    { url: `${SITE_URL}/privacy-policy`, lastModified },
-    { url: `${SITE_URL}/cookie-policy`, lastModified },
-    { url: `${SITE_URL}/Auto`, lastModified },
-    { url: `${SITE_URL}/gate`, lastModified },
+    {
+      url: `${SITE_URL}/`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 1,
+    },
+    {
+      url: `${SITE_URL}/gallery`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${SITE_URL}/partners`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/contatti`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${SITE_URL}/team`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/news`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${SITE_URL}/privacy-policy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/cookie-policy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
   ];
 }

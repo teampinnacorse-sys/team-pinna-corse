@@ -1,8 +1,3 @@
-// app/robots.js
-
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://team-pinna-corse.vercel.app";
-
 export default function robots() {
   return {
     rules: [
@@ -11,7 +6,6 @@ export default function robots() {
         allow: "/",
       },
     ],
-    sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
+    sitemap: "https://www.teampinnacorse.com/sitemap.xml",
   };
 }
