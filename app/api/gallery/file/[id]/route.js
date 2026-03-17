@@ -3,6 +3,14 @@ import { NextResponse } from "next/server";
 const API_KEY = process.env.GOOGLE_API_KEY;
 const DRIVE_API = "https://www.googleapis.com/drive/v3/files";
 
+function buildMetaUrl(fileId) {
+  const url = new URL(`${DRIVE_API}/${encodeURIComponent(fileId)}`);
+  url.searchParams.set("key", API_KEY);
+  url.searchParams.set("supportsAllDrives", "true");
+  url.searchParams.set("fields", "id,name,mimeType,trashed");
+  return url.toString();
+}
+
 function buildMediaUrl(fileId) {
   const url = new URL(`${DRIVE_API}/${encodeURIComponent(fileId)}`);
   url.searchParams.set("key", API_KEY);
@@ -27,22 +35,48 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: "ID file mancante." }, { status: 400 });
     }
 
-    const res = await fetch(buildMediaUrl(id), {
+    const metaRes = await fetch(buildMetaUrl(id), { cache: "no-store" });
+
+    if (!metaRes.ok) {
+      const txt = await metaRes.text();
+      return NextResponse.json(
+        { error: `Drive meta error (${metaRes.status}): ${txt}` },
+        { status: metaRes.status },
+      );
+    }
+
+    const meta = await metaRes.json();
+
+    if (meta.trashed) {
+      return NextResponse.json(
+        { error: "File eliminato da Google Drive." },
+        { status: 404 },
+      );
+    }
+
+    if (!meta.mimeType?.startsWith("image/")) {
+      return NextResponse.json(
+        { error: "Il file richiesto non è un'immagine." },
+        { status: 400 },
+      );
+    }
+
+    const mediaRes = await fetch(buildMediaUrl(id), {
       cache: "no-store",
     });
 
-    if (!res.ok) {
-      const txt = await res.text();
+    if (!mediaRes.ok) {
+      const txt = await mediaRes.text();
       return NextResponse.json(
-        { error: `Drive file error (${res.status}): ${txt}` },
-        { status: res.status },
+        { error: `Drive file error (${mediaRes.status}): ${txt}` },
+        { status: mediaRes.status },
       );
     }
 
     const contentType =
-      res.headers.get("content-type") || "application/octet-stream";
+      mediaRes.headers.get("content-type") || meta.mimeType || "image/jpeg";
 
-    const arrayBuffer = await res.arrayBuffer();
+    const arrayBuffer = await mediaRes.arrayBuffer();
 
     return new NextResponse(arrayBuffer, {
       status: 200,

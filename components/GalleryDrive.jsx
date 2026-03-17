@@ -55,29 +55,35 @@ export default function GalleryDrive() {
     };
   }, []);
 
+  const allAlbum = useMemo(() => {
+    return albums.find((a) => a.id === "all") || null;
+  }, [albums]);
+
   const photosToShow = useMemo(() => {
     if (!albums.length) return [];
 
     if (activeId === "all") {
-      return albums.flatMap((a) => a.photos);
+      return allAlbum?.photos || [];
     }
 
     const found = albums.find((a) => a.id === activeId);
-    return found ? found.photos : [];
+    return found?.photos || [];
+  }, [albums, activeId, allAlbum]);
+
+  const currentAlbumName = useMemo(() => {
+    if (activeId === "all") return "Tutte le foto";
+    return albums.find((a) => a.id === activeId)?.name || "";
   }, [albums, activeId]);
 
   const lbAlbums = useMemo(
     () => [
       {
         id: activeId,
-        name:
-          activeId === "all"
-            ? "Tutte le foto"
-            : albums.find((a) => a.id === activeId)?.name || "",
+        name: currentAlbumName,
         photos: photosToShow,
       },
     ],
-    [albums, activeId, photosToShow],
+    [activeId, currentAlbumName, photosToShow],
   );
 
   const openLightbox = (idx) =>
@@ -87,15 +93,17 @@ export default function GalleryDrive() {
       photoIdx: idx,
     });
 
-  const totalCount = albums.reduce((n, a) => n + a.photos.length, 0);
+  const totalCount = allAlbum?.photos?.length || 0;
 
   return (
     <section className="gd-wrap">
-      <h1 className="gd-title">Galleria</h1>
+      <div className="gd-head">
+        <h1 className="gd-title">Galleria</h1>
+      </div>
 
-      <div className="gd-tabs">
+      <div className="gd-toolbar" role="tablist" aria-label="Filtra album">
         <button
-          className={`gd-tab ${activeId === "all" ? "is-active" : ""}`}
+          className={`gd-chip ${activeId === "all" ? "is-active" : ""}`}
           onClick={() => setActiveId("all")}
           title="Mostra tutte le foto"
           type="button"
@@ -103,35 +111,41 @@ export default function GalleryDrive() {
           Tutte <span>{totalCount}</span>
         </button>
 
-        {albums.map((al) => (
-          <button
-            key={al.id}
-            className={`gd-tab ${activeId === al.id ? "is-active" : ""}`}
-            onClick={() => setActiveId(al.id)}
-            title={al.name}
-            type="button"
-          >
-            {al.name} <span>{al.photos.length}</span>
-          </button>
-        ))}
+        {albums
+          .filter((al) => al.id !== "all")
+          .map((al) => (
+            <button
+              key={al.id}
+              className={`gd-chip ${activeId === al.id ? "is-active" : ""}`}
+              onClick={() => setActiveId(al.id)}
+              title={al.name}
+              type="button"
+            >
+              {al.name} <span>{al.photos.length}</span>
+            </button>
+          ))}
       </div>
 
       {loading && (
-        <div className="gd-grid">
+        <div className="gd-grid" aria-hidden="true">
           {Array.from({ length: 12 }).map((_, i) => (
             <div key={i} className="gd-skeleton" />
           ))}
         </div>
       )}
 
-      {!!err && <div className="gd-error">Errore: {err}</div>}
+      {!!err && (
+        <div className="gd-error">
+          <strong>Errore:</strong> {err}
+        </div>
+      )}
 
       {!loading && !err && photosToShow.length > 0 && (
         <div className="gd-grid">
           {photosToShow.map((ph, idx) => (
             <button
               key={ph.id}
-              className="gd-item"
+              className="gd-card"
               onClick={() => openLightbox(idx)}
               aria-label={`Apri ${ph.name}`}
               title={ph.name}

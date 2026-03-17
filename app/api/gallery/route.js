@@ -13,7 +13,7 @@ function buildDriveUrl(params = {}) {
     includeItemsFromAllDrives: "true",
     supportsAllDrives: "true",
     pageSize: "1000",
-    fields: "nextPageToken, files(id,name,mimeType,parents,thumbnailLink)",
+    fields: "nextPageToken,files(id,name,mimeType,parents,thumbnailLink)",
     ...params,
   };
 
@@ -68,6 +68,15 @@ function toImage(file) {
   };
 }
 
+function uniqueById(items) {
+  const seen = new Set();
+  return items.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}
+
 async function listAlbums(rootId) {
   const q = [
     `'${rootId}' in parents`,
@@ -97,27 +106,19 @@ async function listImagesIn(folderId) {
     .sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true }));
 }
 
-async function listImagesInRoot(rootId) {
-  const q = [
-    `'${rootId}' in parents`,
-    "mimeType contains 'image/'",
-    "trashed = false",
-  ].join(" and ");
-
-  const files = await gdriveListAll({ q });
-
-  return files
-    .filter((f) => f.mimeType?.startsWith("image/"))
-    .map(toImage)
-    .sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true }));
-}
-
 export async function GET() {
   try {
-    const [rootImages, folders] = await Promise.all([
-      listImagesInRoot(ROOT_ID),
-      listAlbums(ROOT_ID),
-    ]);
+    if (!API_KEY || !ROOT_ID) {
+      return NextResponse.json(
+        {
+          error:
+            "Configura GOOGLE_API_KEY e DRIVE_ROOT_FOLDER_ID nelle variabili ambiente.",
+        },
+        { status: 500 },
+      );
+    }
+
+    const folders = await listAlbums(ROOT_ID);
 
     const perFolder = await Promise.all(
       folders.map(async (folder) => {
@@ -130,23 +131,41 @@ export async function GET() {
       }),
     );
 
-    return NextResponse.json(
+    const onlyAlbumsWithPhotos = perFolder.filter(
+      (album) => Array.isArray(album.photos) && album.photos.length > 0,
+    );
+
+    const allPhotos = uniqueById(
+      onlyAlbumsWithPhotos.flatMap((album) => album.photos),
+    );
+
+    const albumList = [
       {
-        albums: [
-          ...(rootImages.length
-            ? [{ id: ROOT_ID, name: "Tutte le foto", photos: rootImages }]
-            : []),
-          ...perFolder,
-        ],
+        id: "all",
+        name: "Tutte",
+        photos: allPhotos,
       },
+      ...onlyAlbumsWithPhotos,
+    ];
+
+    return NextResponse.json(
+      { albums: albumList },
       {
+        status: 200,
         headers: {
-          "Cache-Control": "no-store",
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
         },
       },
     );
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Errore gallery" }, { status: 500 });
+    console.error("GET /api/gallery error:", error);
+
+    return NextResponse.json(
+      {
+        error:
+          error.message || "Errore interno durante il caricamento gallery.",
+      },
+      { status: 500 },
+    );
   }
 }
