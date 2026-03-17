@@ -63,7 +63,7 @@ export default function ParallaxSection() {
           <div className="video">
             <iframe
               className="video__iframe"
-              src="https://www.youtube.com/embed/Scxs7L0vhZ4"
+              src="https://www.youtube.com/embed/GLCGREhsV-Y"
               title="Rally"
               allowFullScreen
             />
