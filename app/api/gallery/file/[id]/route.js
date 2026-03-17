@@ -7,7 +7,7 @@ function buildMetaUrl(fileId) {
   const url = new URL(`${DRIVE_API}/${encodeURIComponent(fileId)}`);
   url.searchParams.set("key", API_KEY);
   url.searchParams.set("supportsAllDrives", "true");
-  url.searchParams.set("fields", "id,name,mimeType,trashed");
+  url.searchParams.set("fields", "id,name,mimeType,trashed,parents");
   return url.toString();
 }
 
@@ -84,8 +84,8 @@ export async function GET(req, { params }) {
         "Content-Type": contentType,
         "Cache-Control":
           mode === "thumb"
-            ? "public, max-age=300, stale-while-revalidate=300"
-            : "public, max-age=300, stale-while-revalidate=300",
+            ? "public, max-age=60, stale-while-revalidate=60"
+            : "public, max-age=60, stale-while-revalidate=60",
       },
     });
   } catch (error) {

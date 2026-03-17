@@ -52,15 +52,6 @@ async function gdriveListAll(params = {}) {
   return allFiles;
 }
 
-function toImage(file) {
-  return {
-    id: file.id,
-    name: file.name,
-    thumbSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=thumb`,
-    fullSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=full`,
-  };
-}
-
 function uniqueById(items) {
   const seen = new Set();
   return items.filter((item) => {
@@ -68,6 +59,17 @@ function uniqueById(items) {
     seen.add(item.id);
     return true;
   });
+}
+
+function toImage(file, albumId, albumName) {
+  return {
+    id: file.id,
+    name: file.name,
+    albumId,
+    albumName,
+    thumbSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=thumb`,
+    fullSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=full`,
+  };
 }
 
 async function listAlbums(rootId) {
@@ -84,7 +86,7 @@ async function listAlbums(rootId) {
   );
 }
 
-async function listImagesIn(folderId) {
+async function listImagesIn(folderId, folderName) {
   const q = [
     `'${folderId}' in parents`,
     "mimeType contains 'image/'",
@@ -96,7 +98,7 @@ async function listImagesIn(folderId) {
   return uniqueById(
     files
       .filter((f) => f.mimeType?.startsWith("image/"))
-      .map(toImage)
+      .map((f) => toImage(f, folderId, folderName))
       .sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true })),
   );
 }
@@ -117,7 +119,7 @@ export async function GET() {
 
     const perFolder = await Promise.all(
       folders.map(async (folder) => {
-        const photos = await listImagesIn(folder.id);
+        const photos = await listImagesIn(folder.id, folder.name);
         return {
           id: folder.id,
           name: folder.name,
@@ -136,6 +138,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
+        rootId: ROOT_ID,
         albums: [
           {
             id: "all",
