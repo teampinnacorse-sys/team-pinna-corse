@@ -71,7 +71,8 @@ export default function TeamAbout() {
           <figure className="t-media reveal reveal--delay-sm">
             <div className="t-imgwrap">
               <Image
-                src="/foto/HomePage2.png"
+                src="/foto/Homepage2.png
+                "
                 alt="Box e preparazione vettura"
                 fill
                 sizes="(max-width: 900px) 100vw, 48vw"
