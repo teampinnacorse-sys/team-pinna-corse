@@ -13,7 +13,7 @@ function buildDriveUrl(params = {}) {
     includeItemsFromAllDrives: "true",
     supportsAllDrives: "true",
     pageSize: "1000",
-    fields: "files(id,name,mimeType,parents)",
+    fields: "nextPageToken, files(id,name,mimeType,parents,thumbnailLink)",
     ...params,
   };
 
@@ -26,17 +26,46 @@ function buildDriveUrl(params = {}) {
   return url.toString();
 }
 
-async function gdriveList(params = {}) {
-  const res = await fetch(buildDriveUrl(params), {
-    cache: "no-store",
-  });
+async function gdriveListAll(params = {}) {
+  let allFiles = [];
+  let pageToken = null;
 
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`Drive API error (${res.status}): ${txt}`);
+  do {
+    const res = await fetch(
+      buildDriveUrl({
+        ...params,
+        pageToken: pageToken || undefined,
+      }),
+      { cache: "no-store" },
+    );
+
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`Drive API error (${res.status}): ${txt}`);
+    }
+
+    const data = await res.json();
+    allFiles.push(...(data.files || []));
+    pageToken = data.nextPageToken || null;
+  } while (pageToken);
+
+  return allFiles;
+}
+
+function normalizeThumb(thumbnailLink, fileId) {
+  if (thumbnailLink) {
+    return thumbnailLink.replace(/=s\d+(-c)?$/, "=s1200");
   }
+  return `/api/gallery/file/${encodeURIComponent(fileId)}?mode=thumb`;
+}
 
-  return res.json();
+function toImage(file) {
+  return {
+    id: file.id,
+    name: file.name,
+    thumbSrc: normalizeThumb(file.thumbnailLink, file.id),
+    fullSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=full`,
+  };
 }
 
 async function listAlbums(rootId) {
@@ -46,20 +75,11 @@ async function listAlbums(rootId) {
     "trashed = false",
   ].join(" and ");
 
-  const data = await gdriveList({ q });
+  const files = await gdriveListAll({ q });
 
-  return (data.files || []).sort((a, b) =>
+  return files.sort((a, b) =>
     a.name.localeCompare(b.name, "it", { numeric: true }),
   );
-}
-
-function toImage(file) {
-  return {
-    id: file.id,
-    name: file.name,
-    thumbSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=thumb`,
-    fullSrc: `/api/gallery/file/${encodeURIComponent(file.id)}?mode=full`,
-  };
 }
 
 async function listImagesIn(folderId) {
@@ -69,40 +89,39 @@ async function listImagesIn(folderId) {
     "trashed = false",
   ].join(" and ");
 
-  const data = await gdriveList({ q });
+  const files = await gdriveListAll({ q });
 
-  const files = (data.files || []).map(toImage);
-  files.sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true }));
-  return files;
+  return files
+    .filter((f) => f.mimeType?.startsWith("image/"))
+    .map(toImage)
+    .sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true }));
 }
 
-function uniqueById(items) {
-  const seen = new Set();
-  return items.filter((item) => {
-    if (seen.has(item.id)) return false;
-    seen.add(item.id);
-    return true;
-  });
+async function listImagesInRoot(rootId) {
+  const q = [
+    `'${rootId}' in parents`,
+    "mimeType contains 'image/'",
+    "trashed = false",
+  ].join(" and ");
+
+  const files = await gdriveListAll({ q });
+
+  return files
+    .filter((f) => f.mimeType?.startsWith("image/"))
+    .map(toImage)
+    .sort((a, b) => a.name.localeCompare(b.name, "it", { numeric: true }));
 }
 
 export async function GET() {
   try {
-    if (!API_KEY || !ROOT_ID) {
-      return NextResponse.json(
-        {
-          error:
-            "Configura GOOGLE_API_KEY e DRIVE_ROOT_FOLDER_ID nelle variabili ambiente.",
-        },
-        { status: 500 },
-      );
-    }
-
-    const folders = await listAlbums(ROOT_ID);
+    const [rootImages, folders] = await Promise.all([
+      listImagesInRoot(ROOT_ID),
+      listAlbums(ROOT_ID),
+    ]);
 
     const perFolder = await Promise.all(
       folders.map(async (folder) => {
         const photos = await listImagesIn(folder.id);
-
         return {
           id: folder.id,
           name: folder.name,
@@ -111,41 +130,23 @@ export async function GET() {
       }),
     );
 
-    const onlyAlbumsWithPhotos = perFolder.filter(
-      (album) => Array.isArray(album.photos) && album.photos.length > 0,
-    );
-
-    const allPhotos = uniqueById(
-      onlyAlbumsWithPhotos.flatMap((album) => album.photos),
-    );
-
-    const albumList = [
-      {
-        id: "all",
-        name: "Tutte",
-        photos: allPhotos,
-      },
-      ...onlyAlbumsWithPhotos,
-    ];
-
     return NextResponse.json(
-      { albums: albumList },
       {
-        status: 200,
+        albums: [
+          ...(rootImages.length
+            ? [{ id: ROOT_ID, name: "Tutte le foto", photos: rootImages }]
+            : []),
+          ...perFolder,
+        ],
+      },
+      {
         headers: {
-          "Cache-Control": "no-store, max-age=0",
+          "Cache-Control": "no-store",
         },
       },
     );
   } catch (error) {
-    console.error("GET /api/gallery error:", error);
-
-    return NextResponse.json(
-      {
-        error:
-          error.message || "Errore interno durante il caricamento gallery.",
-      },
-      { status: 500 },
-    );
+    console.error(error);
+    return NextResponse.json({ error: "Errore gallery" }, { status: 500 });
   }
 }

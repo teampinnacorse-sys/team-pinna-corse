@@ -1,105 +1,65 @@
 import { NextResponse } from "next/server";
 
 const API_KEY = process.env.GOOGLE_API_KEY;
+const DRIVE_API = "https://www.googleapis.com/drive/v3/files";
 
-function buildMetadataUrl(id) {
-  const safeId = encodeURIComponent(id);
-  const url = new URL(`https://www.googleapis.com/drive/v3/files/${safeId}`);
-  url.searchParams.set("key", API_KEY);
-  url.searchParams.set("fields", "id,name,mimeType,thumbnailLink");
-  return url.toString();
-}
-
-function buildMediaUrl(id) {
-  const safeId = encodeURIComponent(id);
-  const url = new URL(`https://www.googleapis.com/drive/v3/files/${safeId}`);
+function buildMediaUrl(fileId) {
+  const url = new URL(`${DRIVE_API}/${encodeURIComponent(fileId)}`);
   url.searchParams.set("key", API_KEY);
   url.searchParams.set("alt", "media");
+  url.searchParams.set("supportsAllDrives", "true");
   return url.toString();
 }
 
-export async function GET(request, context) {
+export async function GET(req, { params }) {
   try {
-    if (!API_KEY) {
-      return new NextResponse("GOOGLE_API_KEY mancante.", { status: 500 });
-    }
+    const id = params?.id;
+    const mode = req.nextUrl.searchParams.get("mode") || "full";
 
-    const id = context?.params?.id;
+    if (!API_KEY) {
+      return NextResponse.json(
+        { error: "Manca GOOGLE_API_KEY nelle variabili ambiente." },
+        { status: 500 },
+      );
+    }
 
     if (!id) {
-      return new NextResponse("ID file mancante.", { status: 400 });
+      return NextResponse.json({ error: "ID file mancante." }, { status: 400 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const mode = searchParams.get("mode") || "full";
-
-    if (mode === "thumb") {
-      const metaRes = await fetch(buildMetadataUrl(id), {
-        cache: "no-store",
-      });
-
-      if (!metaRes.ok) {
-        const txt = await metaRes.text();
-        return new NextResponse(
-          `Drive metadata error (${metaRes.status}): ${txt}`,
-          {
-            status: metaRes.status,
-          },
-        );
-      }
-
-      const meta = await metaRes.json();
-
-      if (meta?.thumbnailLink) {
-        const thumbUrl = meta.thumbnailLink.replace(/=s\d+(-c)?$/, "=s800");
-
-        const thumbRes = await fetch(thumbUrl, {
-          cache: "no-store",
-        });
-
-        if (thumbRes.ok) {
-          const contentType =
-            thumbRes.headers.get("content-type") || "image/jpeg";
-          const arrayBuffer = await thumbRes.arrayBuffer();
-
-          return new NextResponse(arrayBuffer, {
-            status: 200,
-            headers: {
-              "Content-Type": contentType,
-              "Cache-Control": "public, max-age=3600, s-maxage=3600",
-            },
-          });
-        }
-      }
-    }
-
-    const mediaRes = await fetch(buildMediaUrl(id), {
+    const res = await fetch(buildMediaUrl(id), {
       cache: "no-store",
     });
 
-    if (!mediaRes.ok) {
-      const txt = await mediaRes.text();
-      return new NextResponse(`Drive file error (${mediaRes.status}): ${txt}`, {
-        status: mediaRes.status,
-      });
+    if (!res.ok) {
+      const txt = await res.text();
+      return NextResponse.json(
+        { error: `Drive file error (${res.status}): ${txt}` },
+        { status: res.status },
+      );
     }
 
     const contentType =
-      mediaRes.headers.get("content-type") || "application/octet-stream";
+      res.headers.get("content-type") || "application/octet-stream";
 
-    const arrayBuffer = await mediaRes.arrayBuffer();
+    const arrayBuffer = await res.arrayBuffer();
 
     return new NextResponse(arrayBuffer, {
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=3600, s-maxage=3600",
+        "Cache-Control":
+          mode === "thumb"
+            ? "public, max-age=300, stale-while-revalidate=300"
+            : "public, max-age=300, stale-while-revalidate=300",
       },
     });
   } catch (error) {
     console.error("GET /api/gallery/file/[id] error:", error);
-    return new NextResponse("Errore interno nel proxy immagine.", {
-      status: 500,
-    });
+
+    return NextResponse.json(
+      { error: error.message || "Errore interno nel recupero immagine." },
+      { status: 500 },
+    );
   }
 }
